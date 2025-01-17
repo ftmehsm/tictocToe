@@ -1,0 +1,11 @@
+.cell {
+    width: 220px;
+    height: 219px;
+    background-color: rgba(201, 249, 252, 1);
+    border: 8px solid rgba(0, 0, 0, 1);
+    border-radius: 16px;
+    box-shadow: -7px 7px 0px 0px rgba(0,0,0,1);
+    cursor: pointer;
+}
+
+  

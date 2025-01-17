@@ -1,0 +1,19 @@
+.container{
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+}
+.reset , .undo , .redo{
+    margin: 50px 0px;
+    font-size: 3rem;
+    font-weight: bold;
+    width: 233px;
+    height: 90px;
+    background-color: rgba(201, 249, 252, 1);
+    border: 8px solid rgba(0, 0, 0, 1);
+    box-shadow: -7px 7px 0px 0px rgba(0,0,0,1);
+    border-radius: 16px;
+    cursor: pointer;
+}
