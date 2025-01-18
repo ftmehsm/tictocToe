@@ -10,31 +10,27 @@ import Buttons from "./Buttons";
 import Moves from "./Moves";
 import { useSearchParams } from "react-router-dom";
 import { useQueryParams, useInitializeQueryParams } from '../services/queryParams';
-import { loadGameFromLocalStorage, saveGameToLocalStorage } from "../services/localStorage";
 
 
 
 function Board() {
+  
   const[searchParams,setSearchParams] = useSearchParams()
-  const [cells, setCells] = useState(Array(9).fill(null));
+  const [cells, setCells] = useState([]);
   const [isXNext, setIsXNext] = useState(true);
-  const [winner, setWinner] = useState(null);
+  const [winner, setWinner] = useState('');
   const [moveHistory, setMoveHistory] = useState([]);
   const [step , setStep] = useState(1);
   const [redoStack, setRedoStack] = useState([]);
 
- 
-
   useInitializeQueryParams(searchParams, setCells, setIsXNext, setMoveHistory,setWinner);
   useQueryParams(cells, moveHistory, isXNext, setSearchParams,winner);
-  
-  
+
+ 
 
   useEffect(()=>{
     if(moveHistory.length){
       stepHandler(moveHistory.length)
-    }else{
-      setCells(Array(9).fill(null))
     }
   },[step,redoStack])
 
