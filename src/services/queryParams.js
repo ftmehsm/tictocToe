@@ -1,74 +1,92 @@
 import { useEffect } from 'react';
 import { loadGameFromLocalStorage, saveGameToLocalStorage } from './localStorage';
 
-export const useQueryParams = (cells, moveHistory, isXNext, setSearchParams, winner) => {
+// Hook for managing query parameters
+
+
+export const useQueryParams = (cells, moveHistory, isXNext, setSearchParams, winner, redoStack) => {
   useEffect(() => {
-    const allNull = cells?.every(value => value === null);
-    const newCells =allNull ? Array(9).fill(null) : [...cells] ; 
-    saveGameToLocalStorage(newCells, moveHistory, winner, isXNext);
-    
-    // به روز رسانی همه پارامترها در یک بار
-    setSearchParams(prevParams => {
+    const allNull = cells?.every((value) => value === null);
+    const redoNull = redoStack?.every((value) => value === null);
+
+    // Save game state to localStorage
+    saveGameToLocalStorage(cells, moveHistory, winner, isXNext);
+
+    setSearchParams((prevParams) => {
       const updatedParams = new URLSearchParams(prevParams);
       
-      // فقط زمانی که newCells تغییر کرده است، به روز رسانی می‌کنیم
-      if(!allNull){
-        updatedParams.set('currentBoard', JSON.stringify(newCells));
-      }else{
-        updatedParams.delete('currentBoard');
-      }
-
-      // به روز رسانی activePlayer
-      updatedParams.set('activePlayer', isXNext ? "player1" : "player2");
-
-      // به روز رسانی moveHistory
-      if (moveHistory.length) {
-        updatedParams.set('moveHistory', JSON.stringify(moveHistory));
+      // Update only if parameters are different to avoid unnecessary renders
+      if (!allNull) {
+        const currentBoardParam = JSON.stringify(cells);
+        if (updatedParams.get("currentBoard") !== currentBoardParam) {
+          updatedParams.set("currentBoard", currentBoardParam);
+        }
       } else {
-        updatedParams.delete('moveHistory');
+        updatedParams.delete("currentBoard");
       }
-      
+
+      if (!redoNull) {
+        const redoParam = JSON.stringify(redoStack);
+        if (updatedParams.get("redo") !== redoParam) {
+          updatedParams.set("redo", redoParam);
+        }
+      } else {
+        updatedParams.delete("redo");
+      }
+
+      // Update other parameters
+      const activePlayer = isXNext ? "player1" : "player2";
+      if (updatedParams.get("activePlayer") !== activePlayer) {
+        updatedParams.set("activePlayer", activePlayer);
+      }
+
+      if (winner && updatedParams.get("winner") !== winner) {
+        updatedParams.set("winner", winner);
+      } else if (!winner) {
+        updatedParams.delete("winner");
+      }
+
+      const moveHistoryParam = JSON.stringify(moveHistory);
+      if (moveHistory.length && updatedParams.get("moveHistory") !== moveHistoryParam) {
+        updatedParams.set("moveHistory", moveHistoryParam);
+      } else if (!moveHistory.length) {
+        updatedParams.delete("moveHistory");
+      }
+
       return updatedParams;
     });
-  }, [moveHistory, cells, isXNext, setSearchParams, winner]);
+  }, [cells, moveHistory, isXNext, setSearchParams, winner, redoStack]);
 };
 
-// تابعی برای خواندن پارامترهای URL
-export const useInitializeQueryParams = (searchParams, setCells, setIsXNext, setMoveHistory, setWinner) => {
+
+// Hook for initializing query parameters
+export const useInitializeQueryParams = (searchParams, setCells, setIsXNext, setMoveHistory, setWinner, setRedoStack) => {
   useEffect(() => {
     const savedGame = loadGameFromLocalStorage();
+
+    // Retrieve parameters from URL
     const currentBoardParam = searchParams.get('currentBoard');
     const activePlayerParam = searchParams.get('activePlayer');
     const moveHistoryParam = searchParams.get('moveHistory');
+    const winnerParam = searchParams.get('winner');
+    const redoParam = searchParams.get('redo');
 
-    if (currentBoardParam && activePlayerParam && moveHistoryParam) {
-      if(currentBoardParam){
+    // Initialize state from URL or localStorage
+    if (currentBoardParam || activePlayerParam || moveHistoryParam || winnerParam || redoParam) {
+      setCells(currentBoardParam ? JSON.parse(currentBoardParam) : Array(9).fill(null));
+      setRedoStack(redoParam ? JSON.parse(redoParam) : []);
+      setWinner(winnerParam || null);
 
-        setCells(JSON.parse(currentBoardParam));
-      }else{
-        setCells(Array(9).fill(null));
-      }
+      setIsXNext(activePlayerParam === 'player1');
 
-      
-
-      if (activePlayerParam === "player1") {
-        setIsXNext(true);  // player1 به معنی X
-      } else if (activePlayerParam === "player2") {
-        setIsXNext(false); // player2 به معنی O
-      }
-  
-      if (moveHistoryParam) {
-        setMoveHistory(JSON.parse(moveHistoryParam));
-      }
-      setWinner(savedGame.winner);
-    }else{
-      setMoveHistory(savedGame.moveHistory);
-      setWinner(savedGame.winner);
-      setIsXNext(savedGame.isXNext);
-      setCells(savedGame.cells);
+      setMoveHistory(moveHistoryParam ? JSON.parse(moveHistoryParam) : []);
+    } else {
+      // Fall back to localStorage
+      setCells(savedGame.cells || Array(9).fill(null));
+      setRedoStack(savedGame.redoStack || []);
+      setWinner(savedGame.winner || null);
+      setIsXNext(savedGame.isXNext || true);
+      setMoveHistory(savedGame.moveHistory || []);
     }
-
-
-
-  }, [searchParams, setCells, setIsXNext, setMoveHistory, setWinner]);
+  }, [searchParams, setCells, setIsXNext, setMoveHistory, setWinner, setRedoStack]);
 };

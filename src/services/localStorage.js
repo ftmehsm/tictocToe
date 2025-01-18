@@ -3,7 +3,7 @@ export const saveGameToLocalStorage = (cells, moveHistory, winner, isXNext) => {
     cells,
     moveHistory,
     winner,
-    isXNext
+    isXNext,
   };
   localStorage.setItem("ticTacToeGame", JSON.stringify(gameState));
 };
