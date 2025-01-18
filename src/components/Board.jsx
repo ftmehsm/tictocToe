@@ -27,7 +27,6 @@ function Board() {
     if(moveHistory.length){
       stepHandler(moveHistory.length)
       const currentWinner = checkWinner(cells);
-
     if (currentWinner) {
       setWinner(currentWinner === "player1.svg" ? "Player 1 won" : "Player 2 won");
     } else if (cells.every((item) => item !== null)) {
@@ -50,7 +49,7 @@ function Board() {
     newMove.player = isXNext ? "player1" : "player2";
 
     setMoveHistory((prevHistory) => [...prevHistory, newMove]);
-    setRedoStack([]); // Clear redo stack on a new move
+    setRedoStack([]); 
 
     const currentWinner = checkWinner(newCells);
 
@@ -84,8 +83,8 @@ function Board() {
       const lastMove = selectedHistory[selectedHistory.length - 1];
       setIsXNext(lastMove?.player !== "player1"); 
       setCells(newCells);
-      setWinner(null); // Clear the winner state
-      setMoveHistory(selectedHistory); // Set the move history to reflect the selected state
+      setWinner(null);
+      setMoveHistory(selectedHistory); 
       setStep(step);
     },
     [moveHistory]
@@ -96,7 +95,7 @@ function Board() {
     (action) => {
       if (action === "UNDO" && moveHistory.length) {
         const newHistory = [...moveHistory];
-        const lastMove = newHistory.pop(); // Remove the last move
+        const lastMove = newHistory.pop(); 
         setRedoStack((prevStack) => [lastMove, ...prevStack]); 
         setMoveHistory(newHistory);
         stepHandler(newHistory.length);
@@ -104,7 +103,7 @@ function Board() {
         const newRedoStack = [...redoStack];
         const lastRedo = newRedoStack.pop(); 
         setRedoStack(newRedoStack); 
-        setMoveHistory((prevHistory) => [...prevHistory, lastRedo]); // Add the move back to history
+        setMoveHistory((prevHistory) => [...prevHistory, lastRedo]); 
       }
     },
     [moveHistory, redoStack, stepHandler]
